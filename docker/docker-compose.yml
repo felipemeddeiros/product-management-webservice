@@ -3,19 +3,15 @@ services:
 
   #PHP Service
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: digitalocean.com/php
+    build: ./php
+    image: felipemeddeiros/php
     container_name: app
     restart: unless-stopped
-    tty: true
     environment:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
-    working_dir: /var/www
     volumes:
-      - ./:/var/www
+      - ../:/var/www
       - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - app-network
@@ -25,13 +21,31 @@ services:
     image: nginx:alpine
     container_name: webserver
     restart: unless-stopped
-    tty: true
     ports:
       - "8000:80"
       - "443:443"
     volumes:
-      - ./:/var/www
+      - ../:/var/www
       - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/log/:/var/log/nginx/
+    networks:
+      - app-network
+
+  #MySQL Service
+  mysql:
+    image: mysql:8.0.20
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: productManagement
+      MYSQL_ROOT_PASSWORD: root
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./mysql/dbdata:/var/lib/mysql/
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
     networks:
       - app-network
 
@@ -39,7 +53,3 @@ services:
 networks:
   app-network:
     driver: bridge
-#Volumes
-volumes:
-  dbdata:
-    driver: local
