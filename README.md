@@ -12,6 +12,7 @@ Get in the php container and execute the commands below
 #getting in the container
 $ docker container exec -it app bash
 #commands
+$ composer install
 $ cp .env.example .env
 $ php artisan key:generate
 $ php artisan config:cache
